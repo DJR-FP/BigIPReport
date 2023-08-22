@@ -1,31 +1,51 @@
-# BigIPReport
+# FP Report
 
-This tool will pull the configuration from multiple load balancers and display it in a table.
+1 sudo apt update
+2 sudo apt install apt-transport-https ca-certificates curl software-properties-common
+3 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+4 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+5 sudo apt update
+6 sudo apt install docker-ce
+7 sudo usermod -aG docker ${USER}
 
-Demo can be shown here:
+--
 
-[https://loadbalancing.se/bigipreportdemo](https://loadbalancing.se/bigipreportdemo)
+8 mkdir -p ~/.docker/cli-plugins/
+9 curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
 
-Installation instructions are available here:
+9.1 chmod +x ~/.docker/cli-plugins/docker-compose
 
-[https://loadbalancing.se/bigipreport-rest/](https://loadbalancing.se/bigipreport-rest/)
+--
 
-DevCentral codeshare:
+10 sudo adduser bigipreport --shell=/bin/false
+11 sudo mkdir -p /opt/bigipreport
+12 cd /opt/bigipreport
+13 sudo git clone https://github.com/DJR-FP/fp-status-page.git .
+14 sudo chown -R bigipreport:bigipreport /opt/bigipreport
+15 sudo chmod 755 /opt/bigipreport/underlay
+16 sudo nano /opt/bigipreport/bigipreportconfig.xml
 
-[https://devcentral.f5.com/codeshare/bigip-report](https://devcentral.f5.com/codeshare/bigip-report)
+17 docker compose
+mkdir fpreport
+cd fpreport
+nano docker-compose.yml
 
-### Some components used for this project
-* [jQuery](https://jquery.com/)
-* [Data tables](https://datatables.net/)
-* [jQuery hightlight plugin](http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html)
-* [SHJS](http://shjs.sourceforge.net)
+version: '3.3'
+services:
+    nginx:
+        ports:
+            - '8080:80'
+        volumes:
+            - '/var/run/docker.sock:/tmp/docker.sock:ro'
+            - '/opt/bigipreport/underlay:/usr/share/nginx/html:ro'
+        restart: 'always'
+        logging:
+            options:
+                max-size: 1g
+        image: nginx
+        
+sudo docker run --rm -v "/opt/bigipreport:/bigipreport/" bigipreport/data-collector
 
-# Developing Javascript
-1. Install NodeJS
-2. Run `npm install` which uses `package.json`
-3. Run `npm run build:dev`
+*/5 * * * * /usr/bin/docker run -d --rm -v "/opt/bigipreport:/bigipreport/" bigipreport/data-collector
 
-The typescript files will now be transpiled and written to js folder path when changes are detected.
-
-[More details on how to contribute to BigIPReport](https://loadbalancing.se/2022/01/19/contributing-to-bigipreport/)
 
