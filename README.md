@@ -1,5 +1,7 @@
 # FP Report
 
+0.0 update nginx to include auto TLS certs
+
 1 sudo apt update
 
 2 sudo apt install apt-transport-https ca-certificates curl software-properties-common
